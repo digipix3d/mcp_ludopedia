@@ -1,0 +1,50 @@
+---
+# ClusterIssuer para Let's Encrypt - Staging (para testes)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    # Servidor de staging do Let's Encrypt (usa certificados inválidos)
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: seu-email@exemplo.com  # ALTERE AQUI
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+---
+# ClusterIssuer para Let's Encrypt - Produção
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # Servidor de produção do Let's Encrypt
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: seu-email@exemplo.com  # ALTERE AQUI
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+---
+# Certificate resource (alternativa ao annotation no Ingress)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ludopedia-mcp-tls
+  namespace: mcp-servers
+spec:
+  secretName: ludopedia-mcp-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - ludopedia-mcp.seudominio.com  # ALTERE AQUI
