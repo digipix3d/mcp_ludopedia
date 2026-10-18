@@ -153,12 +153,12 @@ echo "   1. Health Check:"
 echo "      kubectl port-forward -n mcp-servers svc/ludopedia-mcp-server 8000:8000"
 echo "      http://localhost:8000/health"
 echo ""
-echo "   2. MCP Server (SSE):"
+echo "   2. MCP Server (Streamable HTTP):"
 echo "      kubectl port-forward -n mcp-servers svc/ludopedia-mcp-server 8000:8000"
-echo "      http://localhost:8000/sse"
+echo "      http://localhost:8000/mcp"
 echo ""
 echo "   3. Via Ingress (se /etc/hosts configurado):"
-echo "      https://ludopedia-mcp.local:$INGRESS_PORT/sse"
+echo "      https://ludopedia-mcp.local:$INGRESS_PORT/mcp"
 echo "      (Aceite o certificado auto-assinado)"
 echo ""
 echo "📝 Configuração do Claude Desktop:"
@@ -172,9 +172,9 @@ cat << 'EOF'
 {
   "mcpServers": {
     "ludopedia": {
-      "url": "http://localhost:8000/sse",
+      "url": "http://localhost:8000/mcp",
       "transport": {
-        "type": "sse",
+        "type": "streamable-http",
         "headers": {
           "Authorization": "Bearer SEU_TOKEN_LUDOPEDIA"
         }

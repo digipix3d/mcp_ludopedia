@@ -149,25 +149,29 @@ echo "   Últimas 10 linhas de log:"
 kubectl logs -n $NAMESPACE -l app=$SERVICE_NAME --tail=10 | sed 's/^/   /'
 echo ""
 
-# Teste 11: Testar SSE endpoint (se token fornecido)
+# Teste 11: Testar o endpoint MCP (se token fornecido)
 if [ -n "$TOKEN" ]; then
-    echo "1️⃣1️⃣  Testando SSE endpoint (com token)..."
+    echo "1️⃣1️⃣  Testando endpoint MCP /mcp (com token)..."
     
     # Port forward temporário
     kubectl port-forward -n $NAMESPACE svc/$SERVICE_NAME 8000:8000 &
     PF_PID=$!
     sleep 3
     
-    if curl -sf -H "Authorization: Bearer $TOKEN" http://localhost:8000/health &> /dev/null; then
-        print_result 0 "Endpoint acessível com token"
+    RESP=$(curl -sf -X POST http://localhost:8000/mcp \
+        -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+        -H "Authorization: Bearer $TOKEN" \
+        -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"meu_perfil","arguments":{}}}')
+    if echo "$RESP" | grep -q '"id_usuario'; then
+        print_result 0 "Ferramenta meu_perfil respondeu com o token"
     else
-        print_result 1 "Endpoint não acessível com token"
+        print_result 1 "Ferramenta meu_perfil falhou: $RESP"
     fi
     
     # Matar port-forward
     kill $PF_PID 2>/dev/null || true
 else
-    echo -e "${YELLOW}1️⃣1️⃣  Teste SSE pulado (forneça LUDOPEDIA_TOKEN para testar)${NC}"
+    echo -e "${YELLOW}1️⃣1️⃣  Teste MCP pulado (forneça LUDOPEDIA_TOKEN para testar)${NC}"
 fi
 echo ""
 
@@ -182,12 +186,12 @@ echo "🌐 Para acessar o serviço:"
 echo ""
 echo "   1. Port Forward (desenvolvimento):"
 echo "      kubectl port-forward -n $NAMESPACE svc/$SERVICE_NAME 8000:8000"
-echo "      URL: http://localhost:8000/sse"
+echo "      URL: http://localhost:8000/mcp"
 echo ""
 echo "   2. Via Ingress (se configurado):"
 INGRESS_HOST=$(kubectl get ingress $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.rules[0].host}' 2>/dev/null)
 if [ -n "$INGRESS_HOST" ]; then
-    echo "      URL: https://$INGRESS_HOST/sse"
+    echo "      URL: https://$INGRESS_HOST/mcp"
 else
     echo "      Configure o Ingress primeiro"
 fi
@@ -196,9 +200,9 @@ echo "📝 Configuração do Claude Desktop:"
 echo '   {
      "mcpServers": {
        "ludopedia": {
-         "url": "http://localhost:8000/sse",
+         "url": "http://localhost:8000/mcp",
          "transport": {
-           "type": "sse",
+           "type": "streamable-http",
            "headers": {
              "Authorization": "Bearer SEU_TOKEN_AQUI"
            }
