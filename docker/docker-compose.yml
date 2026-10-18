@@ -11,6 +11,8 @@ services:
     environment:
       - PORT=8000
       - HOST=0.0.0.0
+      # Opcional (uso pessoal): token usado quando o cliente não manda o header Authorization
+      - LUDOPEDIA_TOKEN=${LUDOPEDIA_TOKEN:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

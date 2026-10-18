@@ -1,6 +1,6 @@
 # Ludopedia MCP Server - Kubernetes Deployment
 
-MCP Server para Ludopedia com suporte SSE (Server-Sent Events) via HTTPS, pronto para deploy em Kubernetes/Rancher Desktop com suporte a múltiplos usuários.
+MCP Server para Ludopedia (transporte Streamable HTTP, endpoint `/mcp`) via HTTPS, pronto para deploy em Kubernetes/Rancher Desktop com suporte a múltiplos usuários.
 
 ## 🏗️ Arquitetura
 
@@ -9,7 +9,7 @@ MCP Server para Ludopedia com suporte SSE (Server-Sent Events) via HTTPS, pronto
 │   Claude    │
 │  Desktop    │
 └─────┬───────┘
-      │ HTTPS + SSE
+      │ HTTPS + MCP
       │ Authorization: Bearer <token>
       ▼
 ┌─────────────────────────────────┐
@@ -26,7 +26,7 @@ MCP Server para Ludopedia com suporte SSE (Server-Sent Events) via HTTPS, pronto
 │  │  Deployment (2+ replicas) │  │
 │  │  ┌─────────────────────┐  │  │
 │  │  │ ludopedia-mcp-server│  │  │
-│  │  │   (FastAPI + SSE)   │  │  │
+│  │  │   (MCP Streamable HTTP) │  │  │
 │  │  └─────────────────────┘  │  │
 │  └───────────┬───────────────┘  │
 └──────────────┼───────────────────┘
@@ -105,7 +105,7 @@ Você deve ver:
 kubectl port-forward -n mcp-servers svc/ludopedia-mcp-server 8000:8000
 ```
 
-URL: `http://localhost:8000/sse`
+URL: `http://localhost:8000/mcp`
 
 #### Opção 2: Ingress (Produção)
 
@@ -115,7 +115,7 @@ URL: `http://localhost:8000/sse`
 kubectl get ingress -n mcp-servers
 ```
 
-2. Acesse via: `https://ludopedia-mcp.seudominio.com/sse`
+2. Acesse via: `https://ludopedia-mcp.seudominio.com/mcp`
 
 ### Configurar no Claude Desktop
 
@@ -129,9 +129,9 @@ Edite o arquivo de configuração:
 {
   "mcpServers": {
     "ludopedia": {
-      "url": "http://localhost:8000/sse",
+      "url": "http://localhost:8000/mcp",
       "transport": {
-        "type": "sse",
+        "type": "streamable-http",
         "headers": {
           "Authorization": "Bearer SEU_TOKEN_LUDOPEDIA_AQUI"
         }
@@ -147,9 +147,9 @@ Edite o arquivo de configuração:
 {
   "mcpServers": {
     "ludopedia": {
-      "url": "https://ludopedia-mcp.seudominio.com/sse",
+      "url": "https://ludopedia-mcp.seudominio.com/mcp",
       "transport": {
-        "type": "sse",
+        "type": "streamable-http",
         "headers": {
           "Authorization": "Bearer SEU_TOKEN_LUDOPEDIA_AQUI"
         }
@@ -170,9 +170,9 @@ Cada usuário deve ter seu próprio token da Ludopedia. Configure o Claude Deskt
 {
   "mcpServers": {
     "ludopedia": {
-      "url": "https://ludopedia-mcp.seudominio.com/sse",
+      "url": "https://ludopedia-mcp.seudominio.com/mcp",
       "transport": {
-        "type": "sse",
+        "type": "streamable-http",
         "headers": {
           "Authorization": "Bearer token_usuario_1"
         }
@@ -185,9 +185,9 @@ Cada usuário deve ter seu próprio token da Ludopedia. Configure o Claude Deskt
 {
   "mcpServers": {
     "ludopedia": {
-      "url": "https://ludopedia-mcp.seudominio.com/sse",
+      "url": "https://ludopedia-mcp.seudominio.com/mcp",
       "transport": {
-        "type": "sse",
+        "type": "streamable-http",
         "headers": {
           "Authorization": "Bearer token_usuario_2"
         }
@@ -315,7 +315,7 @@ curl http://localhost:8000/health
 # Testar SSE endpoint (requer token válido)
 curl -H "Authorization: Bearer seu_token" \
      -H "Accept: text/event-stream" \
-     http://localhost:8000/sse
+     http://localhost:8000/mcp
 ```
 
 ## 🔧 Troubleshooting

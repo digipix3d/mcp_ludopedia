@@ -64,19 +64,19 @@ echo "🌐 Para acessar o serviço:"
 echo ""
 echo "   1. Via Port Forward (desenvolvimento):"
 echo "      kubectl port-forward -n mcp-servers svc/ludopedia-mcp-server 8000:8000"
-echo "      URL: http://localhost:8000/sse"
+echo "      URL: http://localhost:8000/mcp"
 echo ""
 echo "   2. Via Ingress (configurado):"
-echo "      URL: https://ludopedia-mcp.seudominio.com/sse"
+echo "      URL: https://ludopedia-mcp.seudominio.com/mcp"
 echo "      (Configure o DNS para apontar para o IP do ingress)"
 echo ""
 echo "📝 Para configurar no Claude Desktop:"
 echo '   {
      "mcpServers": {
        "ludopedia": {
-         "url": "https://ludopedia-mcp.seudominio.com/sse",
+         "url": "https://ludopedia-mcp.seudominio.com/mcp",
          "transport": {
-           "type": "sse",
+           "type": "streamable-http",
            "headers": {
              "Authorization": "Bearer SEU_TOKEN_LUDOPEDIA"
            }
